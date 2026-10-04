@@ -1,0 +1,5 @@
+season,core_mean_k,suburban_mean_k,rural_mean_k,core_mean_c,suburban_mean_c,rural_mean_c,uhi_intensity_k,merra2_grid_mean_k,internal_variation_masked_k
+Winter (Jan-Feb),291.55,289.75,287.95,18.4,16.6,14.8,3.6,289.35,7.1
+Pre-Monsoon (May),317.45,315.65,313.95,44.3,42.5,40.8,3.5,315.85,6.8
+Monsoon (Aug),305.05,304.15,303.15,31.9,31.0,30.0,1.9,304.05,4.2
+Post-Monsoon (Oct-Nov),301.65,300.25,298.65,28.5,27.1,25.5,3.0,299.95,6.1

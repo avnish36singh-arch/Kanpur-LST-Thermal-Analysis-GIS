@@ -106,12 +106,13 @@ def fetch_kanpur_nasa_power(output_csv):
         })
         
     df = pd.DataFrame(records)
-    os.makedirs(os.path.dirname(output_csv), exist_ok=True)
+    os.makedirs(os.path.dirname(os.path.abspath(output_csv)), exist_ok=True)
     df.to_csv(output_csv, index=False)
     print(f"Successfully saved {len(df)} daily NASA POWER records to {output_csv}.")
     print(f"Summary: Mean LST={df['LST_Skin_C'].mean():.2f}°C, Mean Air Temp={df['Air_Temp_2M_C'].mean():.2f}°C, Max LST={df['LST_Skin_C'].max():.2f}°C")
     return df
 
 if __name__ == "__main__":
-    out = os.path.join("data", "lst", "kanpur_nasa_power_daily.csv")
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    out = os.path.join(project_root, "data", "raw", "kanpur_nasa_power_daily.csv")
     fetch_kanpur_nasa_power(out)

@@ -1,0 +1,13 @@
+{
+  "total_records": 2556,
+  "mean_lst_c": 25.96,
+  "mean_air_c": 25.87,
+  "max_lst_c": 43.39,
+  "min_lst_c": 5.61,
+  "mean_delta_t_c": 0.1,
+  "summer_mean_delta_t_c": 1.01,
+  "winter_mean_delta_t_c": -0.97,
+  "severe_inversion_days": 280,
+  "danger_heat_days": 45,
+  "urban_heat_island_max_delta_c": 4.5
+}

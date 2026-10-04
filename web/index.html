@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanpur LST & Microclimate GIS | Satellite Earth Observation Portal</title>
+  <meta name="description" content="High-resolution Land Surface Temperature (LST), Urban Heat Island dynamics, and atmospheric inversion telemetry across Kanpur, India (2017–2023).">
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet GIS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Core App Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">
+        <i class="fa-solid fa-satellite-dish"></i>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Kanpur Earth Observation &middot; LST GIS Portal</span>
+        <span class="brand-sub">NASA POWER MERRA-2 &bull; UPPCB CAAQMS &bull; QGIS Spatial Microclimate (2017–2023)</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <div class="telemetry-badge">
+        <span class="pulse-dot"></span>
+        <span id="telemetryCountBadge">2,556 Daily Observations</span>
+      </div>
+      <a href="https://github.com/avnish36singh-arch/Kanpur-LST-Thermal-Analysis-GIS" target="_blank" class="nav-btn github-btn" title="View GitHub Source">
+        <i class="fa-brands fa-github"></i>
+        <span>Repository</span>
+      </a>
+      <button id="themeToggleBtn" class="nav-btn icon-only-btn" title="Toggle Display Theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container -->
+  <main class="main-container">
+
+    <!-- KPI Metric Cards Grid -->
+    <section class="kpi-grid">
+      <div class="kpi-card" id="kpiMeanLST">
+        <div class="kpi-header">
+          <span class="kpi-label">7-Year Mean LST</span>
+          <i class="fa-solid fa-temperature-half kpi-icon"></i>
+        </div>
+        <div class="kpi-value">25.96<span class="kpi-unit">°C</span></div>
+        <div class="kpi-footer text-emerald">
+          <i class="fa-solid fa-equals"></i> Decoupled: Mean Air Temp 25.87°C
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiPeakSummer">
+        <div class="kpi-header">
+          <span class="kpi-label">Peak Summer Skin Temp</span>
+          <i class="fa-solid fa-sun-plant-wilt kpi-icon text-red"></i>
+        </div>
+        <div class="kpi-value text-red">43.39<span class="kpi-unit">°C</span></div>
+        <div class="kpi-footer text-red">
+          <i class="fa-solid fa-arrow-trend-up"></i> June 12, 2019 (Air: 40.7°C)
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiWinterMin">
+        <div class="kpi-header">
+          <span class="kpi-label">Winter Radiation Min</span>
+          <i class="fa-solid fa-snowflake kpi-icon text-blue"></i>
+        </div>
+        <div class="kpi-value text-blue">5.61<span class="kpi-unit">°C</span></div>
+        <div class="kpi-footer text-blue">
+          <i class="fa-solid fa-arrow-trend-down"></i> Dec 30, 2019 (Inversion: -3.04°C)
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiUHIDelta">
+        <div class="kpi-header">
+          <span class="kpi-label">Max Spatial UHI Spread</span>
+          <i class="fa-solid fa-city kpi-icon text-amber"></i>
+        </div>
+        <div class="kpi-value text-amber">4.50<span class="kpi-unit">°C</span></div>
+        <div class="kpi-footer text-amber">
+          <i class="fa-solid fa-arrows-split-up-and-left"></i> Urban Core (+2.1°C) vs Ganga (-2.4°C)
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiInversionDays">
+        <div class="kpi-header">
+          <span class="kpi-label">Severe Inversion Days</span>
+          <i class="fa-solid fa-smog kpi-icon text-purple"></i>
+        </div>
+        <div class="kpi-value text-purple" id="valInversionDays">218<span class="kpi-unit">days</span></div>
+        <div class="kpi-footer text-purple">
+          <i class="fa-solid fa-shield-virus"></i> NISI > 1.8 (PM2.5 Stagnation Trap)
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiHeatRiskDays">
+        <div class="kpi-header">
+          <span class="kpi-label">Dangerous Heat Days</span>
+          <i class="fa-solid fa-triangle-exclamation kpi-icon text-orange"></i>
+        </div>
+        <div class="kpi-value text-orange" id="valDangerDays">372<span class="kpi-unit">days</span></div>
+        <div class="kpi-footer text-orange">
+          <i class="fa-solid fa-fire"></i> NOAA Heat Index &ge; 41°C
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Event Jump Banner -->
+    <section class="quick-jump-banner">
+      <span class="quick-jump-label"><i class="fa-solid fa-bolt-lightning"></i> Historical Climatology Events:</span>
+      <button class="event-pill" data-year="2019" data-season="Summer"><i class="fa-solid fa-fire text-red"></i> June 2019 Heatwave (43.4°C)</button>
+      <button class="event-pill" data-year="2019" data-season="Winter"><i class="fa-solid fa-snowflake text-blue"></i> Dec 2019 Inversion Trap (5.6°C)</button>
+      <button class="event-pill" data-year="2021" data-season="Winter"><i class="fa-solid fa-smog text-purple"></i> Winter 2021 Severe PM2.5 Surge</button>
+      <button class="event-pill" data-year="ALL" data-season="ALL"><i class="fa-solid fa-arrows-rotate"></i> Reset All Observations</button>
+    </section>
+
+    <!-- Interactive Workspace: GIS Map (Left) + Analytics Panel (Right) -->
+    <section class="workspace-grid">
+
+      <!-- Left Column: Interactive GIS Map -->
+      <div class="gis-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2 class="card-title"><i class="fa-solid fa-map-location-dot"></i> Spatial Microclimate GIS Visualizer</h2>
+            <span class="card-subtitle">EPSG:4326 WGS84 &middot; Modeled Thermal Zones, CPCB Stations & Ganga River Corridor</span>
+          </div>
+          <div class="gis-controls">
+            <div class="basemap-selector">
+              <label for="basemapSelect"><i class="fa-solid fa-layer-group"></i> Basemap:</label>
+              <select id="basemapSelect" class="form-select">
+                <option value="dark" selected>CartoDB Dark</option>
+                <option value="satellite">Esri World Imagery (Satellite)</option>
+                <option value="osm">OpenStreetMap</option>
+              </select>
+            </div>
+            <button id="resetMapViewBtn" class="pill-btn" title="Reset View to Kanpur Basin">
+              <i class="fa-solid fa-crosshairs"></i> Reset View
+            </button>
+          </div>
+        </div>
+
+        <!-- GIS Layer Toggles Toolbar -->
+        <div class="layer-toolbar">
+          <span class="toolbar-label"><i class="fa-solid fa-filter"></i> Layers:</span>
+          <label class="toggle-pill">
+            <input type="checkbox" id="layerZonesToggle" checked>
+            <span class="pill-slider"></span>
+            <span>Thermal Zones</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="layerStationsToggle" checked>
+            <span class="pill-slider"></span>
+            <span>CPCB Stations</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="layerGangaToggle" checked>
+            <span class="pill-slider"></span>
+            <span>Ganga Corridor</span>
+          </label>
+          <label class="toggle-pill">
+            <input type="checkbox" id="layerTransectToggle" checked>
+            <span class="pill-slider"></span>
+            <span>25km Transect</span>
+          </label>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="leafletMap" class="map-container"></div>
+
+        <!-- Map Legend -->
+        <div class="map-legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:#EF4444;"></span> Central Core (+2.1°C)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#DC2626;"></span> Jajmau Industrial (+1.8°C)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#F97316;"></span> Panki Buffer (+1.6°C)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#10B981;"></span> IITK Canopy (-0.8°C)</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:#06B6D4;"></span> Ganga Floodplain (-2.4°C)</div>
+          <div class="legend-item"><span class="legend-station-marker"></span> CPCB CAAQMS Station</div>
+        </div>
+
+        <!-- Interactive Inspector Panel (Updated on Polygon/Station Click) -->
+        <div class="inspector-box" id="inspectorBox">
+          <div class="inspector-header">
+            <span class="inspector-tag" id="inspectorTag">SELECTED ZONE</span>
+            <h3 class="inspector-name" id="inspectorName">Click any zone or station on the map to inspect</h3>
+          </div>
+          <div class="inspector-grid" id="inspectorGrid">
+            <div class="inspector-cell">
+              <span class="cell-label">UHI Offset</span>
+              <span class="cell-val text-red" id="inspectorUHI">+2.1°C</span>
+            </div>
+            <div class="inspector-cell">
+              <span class="cell-label">Morphology</span>
+              <span class="cell-val" id="inspectorType">High-Density Built-Up</span>
+            </div>
+            <div class="inspector-cell">
+              <span class="cell-label">Surface Albedo</span>
+              <span class="cell-val text-amber" id="inspectorAlbedo">10–12%</span>
+            </div>
+            <div class="inspector-cell">
+              <span class="cell-label">Spatial Area</span>
+              <span class="cell-val text-cyan" id="inspectorArea">24.5 km²</span>
+            </div>
+          </div>
+          <div class="inspector-footer" id="inspectorMitigation">
+            <strong>Cooling Intervention:</strong> High-albedo cool roofs and rooftop vegetation retrofitting.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Charts & Diagnostic Telemetry -->
+      <div class="analytics-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <h2 class="card-title"><i class="fa-solid fa-chart-line"></i> Earth Observation Telemetry Engine</h2>
+            <span class="card-subtitle">NASA POWER MERRA-2 Multi-Year Climatology & Inversion Diagnostics</span>
+          </div>
+          <!-- Time Filters -->
+          <div class="chart-filters">
+            <select id="yearFilter" class="form-select">
+              <option value="ALL" selected>All Years (2017–2023)</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+              <option value="2019">2019</option>
+              <option value="2018">2018</option>
+              <option value="2017">2017</option>
+            </select>
+            <select id="seasonFilter" class="form-select">
+              <option value="ALL" selected>All Seasons</option>
+              <option value="Summer">Summer (Mar–May)</option>
+              <option value="Monsoon">Monsoon (Jun–Sep)</option>
+              <option value="Post-Monsoon">Post-Monsoon (Oct–Nov)</option>
+              <option value="Winter">Winter (Dec–Feb)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Analysis Mode Tabs (5 Interactive Modes) -->
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="tabTimeline">
+            <i class="fa-solid fa-wave-square"></i> LST vs Air Temp
+          </button>
+          <button class="tab-btn" data-tab="tabGradient">
+            <i class="fa-solid fa-temperature-arrow-up"></i> Thermal Gradient (&Delta;T)
+          </button>
+          <button class="tab-btn" data-tab="tabPM25">
+            <i class="fa-solid fa-smog"></i> PM2.5 Inversion Coupling
+          </button>
+          <button class="tab-btn" data-tab="tabInversion">
+            <i class="fa-solid fa-wind"></i> Ventilation &amp; NISI
+          </button>
+          <button class="tab-btn" data-tab="tabHeatIndex">
+            <i class="fa-solid fa-fire-flame-curved"></i> Heat Index Stress
+          </button>
+        </div>
+
+        <!-- Chart Canvas Container -->
+        <div class="chart-viewport">
+          <canvas id="telemetryChart"></canvas>
+        </div>
+
+        <!-- Diagnostic Summary Insight Bar -->
+        <div class="diagnostic-banner" id="diagnosticBanner">
+          <div class="diag-icon"><i class="fa-solid fa-circle-info"></i></div>
+          <div class="diag-text" id="diagnosticText">
+            Loading telemetry observations...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zone Comparison Simulator & Microclimate Matrix -->
+    <section class="simulator-section">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title"><i class="fa-solid fa-sliders"></i> Microclimate Differential Simulator</h2>
+          <span class="card-subtitle">Select any two morphological zones to compute urban heat island gradient, albedo disparity, and cooling mitigation ROI</span>
+        </div>
+      </div>
+
+      <div class="simulator-body">
+        <div class="sim-selector-row">
+          <div class="sim-selector-box">
+            <label for="zoneSelectA"><i class="fa-solid fa-building"></i> Zone A (Reference):</label>
+            <select id="zoneSelectA" class="form-select">
+              <option value="ZONE_01" selected>Central Kanpur Urban Core</option>
+              <option value="ZONE_02">Jajmau Industrial Tannery Cluster</option>
+              <option value="ZONE_03">Panki Industrial & Thermal Buffer</option>
+              <option value="ZONE_04">IITK & Kalyanpur Institutional Belt</option>
+              <option value="ZONE_05">Ganga Riparian Buffer & Floodplain</option>
+            </select>
+          </div>
+
+          <div class="sim-vs-badge">VS</div>
+
+          <div class="sim-selector-box">
+            <label for="zoneSelectB"><i class="fa-solid fa-tree"></i> Zone B (Comparison):</label>
+            <select id="zoneSelectB" class="form-select">
+              <option value="ZONE_01">Central Kanpur Urban Core</option>
+              <option value="ZONE_02">Jajmau Industrial Tannery Cluster</option>
+              <option value="ZONE_03">Panki Industrial & Thermal Buffer</option>
+              <option value="ZONE_04">IITK & Kalyanpur Institutional Belt</option>
+              <option value="ZONE_05" selected>Ganga Riparian Buffer & Floodplain</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sim-results-grid" id="simResultsGrid">
+          <!-- Dynamically filled by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Publication-Grade Figure Gallery (Figures 01 - 07) -->
+    <section class="gallery-section">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title"><i class="fa-solid fa-images"></i> Publication Figure Suite (300 DPI)</h2>
+          <span class="card-subtitle">Peer-review grade analytical figures generated autonomously by the GIS pipeline</span>
+        </div>
+        <div class="gallery-nav-btns">
+          <button class="pill-btn gallery-filter active" data-fig="all">All Figures (11)</button>
+          <button class="pill-btn gallery-filter" data-fig="landsat">Investigation 04 (Landsat 30m)</button>
+          <button class="pill-btn gallery-filter" data-fig="climatology">Climatology</button>
+          <button class="pill-btn gallery-filter" data-fig="gis">Spatial GIS</button>
+          <button class="pill-btn gallery-filter" data-fig="inversion">Inversion &amp; AQ</button>
+        </div>
+      </div>
+
+      <div class="gallery-grid">
+        <!-- Figure 8: Landsat 30m Heat Map (Investigation 04) -->
+        <div class="figure-card" data-category="landsat">
+          <div class="fig-img-box">
+            <img src="assets/plots/kanpur-uhi-30m.png" alt="Figure 8: Landsat 30m Heat Map" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/kanpur-uhi-30m.png" data-title="Investigation 04 · Figure 8: High-Resolution 30m Landsat 8/9 TIRS-2 Thermal Radiometry"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 8 · Investigation 04</span>
+            <h4 class="fig-title">High-Resolution 30m Landsat 8/9 TIRS-2 Thermal Radiometry</h4>
+            <p class="fig-desc">Concentric radial zonation showing +3.8K peak thermal excess in the dense core, contrasting with the Ganga riverine cooling corridor (-2.6K) and vegetative buffers.</p>
+          </div>
+        </div>
+
+        <!-- Figure 9: MERRA-2 vs Landsat Overlay (Investigation 04) -->
+        <div class="figure-card" data-category="landsat">
+          <div class="fig-img-box">
+            <img src="assets/plots/kanpur-uhi-comparison-merra2.png" alt="Figure 9: MERRA-2 vs Landsat 30m" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/kanpur-uhi-comparison-merra2.png" data-title="Investigation 04 · Figure 9: Coarse Reanalysis Spatial Masking (55x60 km MERRA-2 vs 30m Landsat)"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 9 · Investigation 04</span>
+            <h4 class="fig-title">Coarse Reanalysis Spatial Masking: MERRA-2 vs. 30m Landsat</h4>
+            <p class="fig-desc">Demonstrates that a single 55&times;60 km MERRA-2 cell masks 7.10K intra-urban temperature heterogeneity and erases localized heat island structure.</p>
+          </div>
+        </div>
+
+        <!-- Figure 10: Seasonal Timeseries (Investigation 04) -->
+        <div class="figure-card" data-category="landsat">
+          <div class="fig-img-box">
+            <img src="assets/plots/kanpur-uhi-timeseries.png" alt="Figure 10: Landsat Seasonal Timeseries" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/kanpur-uhi-timeseries.png" data-title="Investigation 04 · Figure 10: Multi-Seasonal Radial Zone Thermal Trajectory (2021–2022)"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 10 · Investigation 04</span>
+            <h4 class="fig-title">Multi-Seasonal Radial Zone Thermal Trajectory (2021–2022)</h4>
+            <p class="fig-desc">Tracks skin temperature trajectories across Urban Core (&lt;5km), Suburban ring (5–15km), Rural periphery (&gt;15km), and the MERRA-2 daily baseline.</p>
+          </div>
+        </div>
+
+        <!-- Figure 11: Seasonal UHI Breakdown (Investigation 04) -->
+        <div class="figure-card" data-category="landsat">
+          <div class="fig-img-box">
+            <img src="assets/plots/kanpur-uhi-seasonal-uhi.png" alt="Figure 11: Seasonal UHI Breakdown" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/kanpur-uhi-seasonal-uhi.png" data-title="Investigation 04 · Figure 11: Seasonal UHI Intensity & Radiometric Breakdown"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 11 · Investigation 04</span>
+            <h4 class="fig-title">Seasonal UHI Intensity &amp; Radiometric Breakdown</h4>
+            <p class="fig-desc">Quantifies winter radiative decoupling (+3.60K) and pre-monsoon superheating (+3.50K) vs. monsoon moisture attenuation (+1.90K).</p>
+          </div>
+        </div>
+
+        <!-- Figure 1 -->
+        <div class="figure-card" data-category="climatology">
+          <div class="fig-img-box">
+            <img src="assets/plots/01_kanpur_lst_seasonal_timeline.png" alt="Figure 1: LST Seasonal Timeline" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/01_kanpur_lst_seasonal_timeline.png" data-title="Figure 1: Seven-Year Daily LST Seasonal Trajectory & Extremes"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 1</span>
+            <h4 class="fig-title">Seven-Year Daily LST Seasonal Trajectory &amp; Extremes</h4>
+            <p class="fig-desc">Continuous daily satellite skin temperature with 7-day and 30-day moving trends alongside extreme heatwave (&gt;40°C) and radiational chill (&lt;15°C) bands.</p>
+          </div>
+        </div>
+
+        <!-- Figure 2 -->
+        <div class="figure-card" data-category="climatology">
+          <div class="fig-img-box">
+            <img src="assets/plots/02_skin_vs_air_temperature_anomaly.png" alt="Figure 2: Skin vs Air Decoupling" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/02_skin_vs_air_temperature_anomaly.png" data-title="Figure 2: Skin vs. Air Thermal Decoupling (Delta T = Tskin - Tair)"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 2</span>
+            <h4 class="fig-title">Skin vs. Air Thermal Decoupling (&Delta;T = T<sub>skin</sub> - T<sub>air</sub>)</h4>
+            <p class="fig-desc">1:1 thermal equilibrium scatter and monthly distributions highlighting the shift from pre-monsoon solar superheating to winter radiative cooling.</p>
+          </div>
+        </div>
+
+        <!-- Figure 3 -->
+        <div class="figure-card" data-category="gis">
+          <div class="fig-img-box">
+            <img src="assets/plots/03_kanpur_spatial_thermal_zones.png" alt="Figure 3: Spatial Thermal Zones" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/03_kanpur_spatial_thermal_zones.png" data-title="Figure 3: Kanpur Metropolitan Spatial Thermal Zonation & CAAQMS"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 3</span>
+            <h4 class="fig-title">Kanpur Metropolitan Spatial Thermal Zonation &amp; CAAQMS</h4>
+            <p class="fig-desc">Vector GIS spatial mapping of urban core UHI (+2.1°C), industrial belts, IIT Kanpur green buffer (-0.8°C), and the Ganga cooling corridor (-2.4°C).</p>
+          </div>
+        </div>
+
+        <!-- Figure 4 -->
+        <div class="figure-card" data-category="inversion">
+          <div class="fig-img-box">
+            <img src="assets/plots/04_lst_inversion_coupling_pm25.png" alt="Figure 4: Inversion Coupling PM2.5" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/04_lst_inversion_coupling_pm25.png" data-title="Figure 4: Satellite Surface Cooling vs Ground PM2.5 Entrapment"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 4</span>
+            <h4 class="fig-title">Satellite Surface Cooling vs Ground PM<sub>2.5</sub> Entrapment</h4>
+            <p class="fig-desc">Coupled thermodynamic time-series linking surface skin cooling under 15°C with severe ground-level CAAQMS particulate spikes exceeding 250 &mu;g/m&sup3;.</p>
+          </div>
+        </div>
+
+        <!-- Figure 5 -->
+        <div class="figure-card" data-category="climatology">
+          <div class="fig-img-box">
+            <img src="assets/plots/05_bioclimatic_heat_stress_index.png" alt="Figure 5: Bioclimatic Heat Stress" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/05_bioclimatic_heat_stress_index.png" data-title="Figure 5: NOAA Bioclimatic Heat Stress & Dangerous Heatwaves"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 5</span>
+            <h4 class="fig-title">NOAA Bioclimatic Heat Stress &amp; Dangerous Heatwaves</h4>
+            <p class="fig-desc">Multi-variable apparent temperature model and annual frequency count of days where Heat Index exceeds the extreme danger threshold (HI &ge; 41°C).</p>
+          </div>
+        </div>
+
+        <!-- Figure 6 -->
+        <div class="figure-card" data-category="inversion">
+          <div class="fig-img-box">
+            <img src="assets/plots/06_ventilation_coefficient_inversion.png" alt="Figure 6: Ventilation Coefficient" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/06_ventilation_coefficient_inversion.png" data-title="Figure 6: Ventilation Coefficient (Vc) & Nocturnal Inversion Severity (NISI)"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 6</span>
+            <h4 class="fig-title">Ventilation Coefficient (V<sub>c</sub>) &amp; Nocturnal Inversion Severity (NISI)</h4>
+            <p class="fig-desc">Quantifies the collapse of atmospheric carrying capacity (&lt;2,000 m&sup2;/s) and empirical stability scoring during Gangetic winter stagnations.</p>
+          </div>
+        </div>
+
+        <!-- Figure 7 -->
+        <div class="figure-card" data-category="gis">
+          <div class="fig-img-box">
+            <img src="assets/plots/07_urban_microclimate_transect.png" alt="Figure 7: Urban Microclimate Transect" loading="lazy">
+            <button class="fig-expand-btn" data-img="assets/plots/07_urban_microclimate_transect.png" data-title="Figure 7: 25-km West-to-East Microclimate Transect Profile"><i class="fa-solid fa-expand"></i></button>
+          </div>
+          <div class="fig-info">
+            <span class="fig-number">Figure 7</span>
+            <h4 class="fig-title">25-km West-to-East Microclimate Transect Profile</h4>
+            <p class="fig-desc">Continuous sampling profile across Panki Industrial &rarr; IITK Institutional &rarr; Central Core &rarr; Jajmau Tannery &rarr; Ganga Floodplain.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Geospatial Downloads & Reproducibility Hub -->
+    <section class="download-section">
+      <div class="card-header">
+        <div class="card-title-group">
+          <h2 class="card-title"><i class="fa-solid fa-download"></i> Open Geospatial Assets &amp; Reproducibility</h2>
+          <span class="card-subtitle">Download standardized vector GeoJSONs, QGIS layer styling, and enriched telemetry</span>
+        </div>
+      </div>
+
+      <div class="download-grid">
+        <a href="data/kanpur_thermal_zones.geojson" download class="dl-item">
+          <i class="fa-solid fa-file-code dl-icon text-red"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_thermal_zones.geojson</span>
+            <span class="dl-meta">EPSG:4326 &middot; 5 Polygons with UHI offset, albedo, and population</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_cpcb_stations.geojson" download class="dl-item">
+          <i class="fa-solid fa-location-crosshairs dl-icon text-blue"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_cpcb_stations.geojson</span>
+            <span class="dl-meta">EPSG:4326 &middot; NSI Kalyanpur &amp; Nehru Nagar station points</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_ganga_riparian.geojson" download class="dl-item">
+          <i class="fa-solid fa-water dl-icon text-cyan"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_ganga_riparian.geojson</span>
+            <span class="dl-meta">EPSG:4326 &middot; Ganga 32.5km river channel and cooling buffer</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_microclimate_transect.geojson" download class="dl-item">
+          <i class="fa-solid fa-route dl-icon text-purple"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_microclimate_transect.geojson</span>
+            <span class="dl-meta">EPSG:4326 &middot; 25km diagnostic sampling transect line</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_lst_daily.json" download class="dl-item">
+          <i class="fa-solid fa-database dl-icon text-amber"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_lst_daily.json</span>
+            <span class="dl-meta">Complete 2,556 daily enriched observations (2017–2023)</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_thermal_zones.qml" download class="dl-item">
+          <i class="fa-solid fa-palette dl-icon text-emerald"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_thermal_zones.qml</span>
+            <span class="dl-meta">QGIS 3.x Categorized Layer Style XML (1-click desktop styling)</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+
+        <a href="data/kanpur_uhi_seasonal_summary.csv" download class="dl-item">
+          <i class="fa-solid fa-table-cells dl-icon text-orange"></i>
+          <div class="dl-details">
+            <span class="dl-name">kanpur_uhi_seasonal_summary.csv</span>
+            <span class="dl-meta">Investigation 04 &middot; Seasonal Landsat 30m UHI metrics &amp; MERRA-2 benchmark</span>
+          </div>
+          <i class="fa-solid fa-arrow-down dl-arrow"></i>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- High-Res Lightbox Modal for Figures -->
+  <div class="lightbox-modal" id="figureLightbox">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-content">
+      <div class="lightbox-header">
+        <h3 id="lightboxTitle">Publication Figure</h3>
+        <button class="lightbox-close-btn" id="lightboxCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightboxImg" src="" alt="Enlarged publication figure">
+      </div>
+      <div class="lightbox-footer">
+        <a id="lightboxDownloadBtn" href="" download class="nav-btn"><i class="fa-solid fa-download"></i> Download Full Resolution (300 DPI)</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="footer-left">
+        <strong>Kanpur Land Surface Temperature (LST) &amp; Urban Inversion Dynamics</strong>
+        <p>Satellite Earth Observation &middot; MERRA-2 Reanalysis &middot; QGIS Microclimate Spatial Modeling</p>
+      </div>
+      <div class="footer-right">
+        <p>Author: <strong>Avnish Singh</strong> (HBTU Kanpur &middot; Signal Earth Environmental Research)</p>
+        <p>Telemetry: NASA POWER Project &middot; Ground Air Quality: CPCB / UPPCB CAAQMS Network</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Leaflet GIS JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+</body>
+</html>
