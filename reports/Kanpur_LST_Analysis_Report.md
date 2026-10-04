@@ -158,7 +158,33 @@ Kanpur features sharp spatial transitions between industrial clusters, historica
 
 ---
 
-## 5. Conclusions & Urban Policy Roadmap
+---
+
+## 5. Multi-Scale Earth Observation: Landsat 8/9 30m Thermal Radiometry (Investigation 04)
+
+*Detailed Satellite Report: [Investigation 04: Intra-Urban Thermal Zoning and UHI in Kanpur (30m Landsat TIRS-2)](../investigations/kanpur-uhi-landsat.md)*
+
+While MERRA-2 reanalysis provides long-term daily temporal continuity (2017–2023), its $0.5^\circ \times 0.625^\circ$ ($55 \times 60\text{ km}$) spatial grid averages the entire metropolitan footprint into a single homogenous cell. High-resolution radiometry from the Thermal Infrared Sensor 2 (TIRS-2) aboard **Landsat 8 and Landsat 9** at 30-meter resolution resolves intra-urban microclimates and quantifies the Urban Heat Island (UHI) intensity relative to the rural periphery.
+
+### Figure 8: 30m Landsat TIRS-2 High-Resolution Skin Temperature Field
+![Figure 8: Landsat 30m LST](../outputs/plots/kanpur-uhi-30m.png)
+*Figure 8: High-resolution (30m) radiant skin temperature raster calibrated via USGS Collection 2 Level 2 ($T_{\text{skin}} = \text{DN} \times 0.00341802 + 149.0$), illustrating thermal clustering in Gomti No. 5, Panki, and Jajmau alongside vegetative buffering in Kalyanpur.*
+
+### Figure 9: Spatial Resolution Discrepancy (Landsat 30m vs. MERRA-2 Reanalysis)
+![Figure 9: Spatial Comparison](../outputs/plots/kanpur-uhi-comparison-merra2.png)
+*Figure 9: Demonstration of coarse reanalysis masking. Left: A single MERRA-2 grid cell over Kanpur averages to 16.20°C in winter. Right: 30m Landsat radiometry within that exact footprint exposes 7.10 K of internal thermal variance (13.8°C along the Ganga to 20.9°C in the urban core).*
+
+### Figure 10: Multi-Seasonal Temporal Trajectory Across Concentric Zones
+![Figure 10: Landsat Timeseries](../outputs/plots/kanpur-uhi-timeseries.png)
+*Figure 10: Multi-seasonal thermal trajectory (July 2021 – October 2022) across concentric urban zones (Urban Core < 5 km, Suburban 5–15 km, Rural Baseline > 15 km).*
+
+### Figure 11: Seasonal Urban Heat Island Intensity (UHII)
+![Figure 11: Seasonal UHI](../outputs/plots/kanpur-uhi-seasonal-uhi.png)
+*Figure 11: Seasonal UHII ($T_{\text{core}} - T_{\text{rural}}$) peaking in dry winter (+3.60 K) and pre-monsoon summer (+3.50 K), dampened during the monsoon (+1.90 K) by cloud albedo and regional soil moisture.*
+
+---
+
+## 6. Conclusions & Urban Policy Roadmap
 
 1. **Integrated Inversion Early Warning**: Continuous satellite thermal infrared tracking ($\Delta T$) coupled with the Nocturnal Inversion Severity Index ($\text{NISI}$) provides an objective mechanism to forecast severe stagnation episodes 24–48 hours prior to ground $\text{PM}_{2.5}$ crisis levels.
 2. **Targeted Cool Roof Retrofitting**: Deploying high-albedo coatings ($\alpha > 0.65$) across 30% of Central Urban Core rooftops can mitigate nocturnal UHI retention by an estimated $1.1^\circ\text{C}$ to $1.4^\circ\text{C}$.

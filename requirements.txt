@@ -14,3 +14,6 @@ shapely>=2.0.0
 earthengine-api>=1.7.0
 google-auth-oauthlib>=1.0.0
 google-api-python-client>=2.100.0
+
+# Testing & Validation
+pytest>=8.0.0
